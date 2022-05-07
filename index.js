@@ -35,11 +35,17 @@ async function run() {
         });
 
         app.get('/items/:id', async (req, res) => {
-            const { id } = req.params;
+            const id = req.params.id;
             console.log(typeof (id));
             const query = { _id: ObjectId(id) };
             const watch = await watchCollection.findOne(query);
             res.send(watch);
+        });
+        app.delete('/items/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await watchCollection.deleteOne(query);
+            res.send(result);
         });
 
     }
