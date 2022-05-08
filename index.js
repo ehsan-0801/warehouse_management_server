@@ -47,6 +47,26 @@ async function run() {
             const result = await watchCollection.deleteOne(query);
             res.send(result);
         });
+        app.put('/items/:id', async (req, res) => {
+            const id = req.params.id;
+            const newWatch = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedwatch = {
+                $set: {
+                    name: newWatch.name,
+                    description: newWatch.description,
+                    img: newWatch.img,
+                    price: newWatch.price,
+                    userId: newWatch.userId,
+                    SupplierName: newWatch.SupplierName,
+                    quantity: newWatch.quantity,
+                    SoldAmount: newWatch.SoldAmount
+                }
+            }
+            const result = await watchCollection.updateOne(filter, updatedwatch, options);
+            res.send(result);
+        });
 
     }
     finally {
