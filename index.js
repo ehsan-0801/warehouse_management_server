@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
@@ -20,8 +21,19 @@ async function run() {
     try {
         await client.connect();
         const watchCollection = client.db('warehouse').collection('watches');
+        const feedback = client.db('warehouse').collection('feedback');
+
+        //For Authentication
+        app.post('/signin', async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken });
+        })
 
 
+        // For Watch databse
         app.get('/items', async (req, res) => {
             const query = {};
             const cursor = watchCollection.find(query);
@@ -33,6 +45,8 @@ async function run() {
             const result = await watchCollection.insertOne(newWatch);
             res.send(result);
         });
+
+
 
         app.get('/items/:id', async (req, res) => {
             const id = req.params.id;
@@ -66,6 +80,19 @@ async function run() {
             }
             const result = await watchCollection.updateOne(filter, updatedwatch, options);
             res.send(result);
+        });
+
+        //For Feedback
+        app.post('/feedback', async (req, res) => {
+            const newfeedback = req.body;
+            const result = await feedback.insertOne(newfeedback);
+            res.send(result);
+        });
+        app.get('/feedback', async (req, res) => {
+            const query = {};
+            const cursor = feedback.find(query);
+            const feedbacks = await cursor.toArray();
+            res.send(feedbacks);
         });
 
     }
